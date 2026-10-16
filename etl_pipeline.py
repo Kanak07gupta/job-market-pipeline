@@ -100,12 +100,12 @@ if __name__ == "__main__":
     if not df_cleaned.empty:
         df_cleaned.to_csv("jobs_preview.csv", index=False)
 
-        # CRITICAL FIX: Appending explicit secure SSL query mapping parameters to avoid cloud network resets
+        # कनेक्शन स्ट्रिंग में sslmode को साफ़ तौर पर पास करना
         connection_url = URL.create(
             drivername="postgresql+psycopg2",
             username="postgres.esiglramkipcofhgyczz",
             password="Iamagirl@kanak07",
-            host="aws-0-ap-south-1.pooler.supabase.com",
+            host="://supabase.com",
             port=5432,
             database="postgres",
             query={"sslmode": "require"}
@@ -119,7 +119,6 @@ if __name__ == "__main__":
                 existing_ids = pd.read_sql(text("SELECT job_id FROM data_analyst_jobs"), con=conn)
 
             if not existing_ids.empty:
-                # Safely cross-match unique rows using uniform integer typing systems
                 df_cleaned = df_cleaned[~df_cleaned['job_id'].astype(int).isin(existing_ids['job_id'].astype(int))]
 
             if not df_cleaned.empty:
@@ -130,6 +129,6 @@ if __name__ == "__main__":
 
         except Exception as database_error:
             print(f"❌ Database upload failed: {database_error}")
-            raise database_error  # Triggers a clean, visible break in GitHub Actions console log tracking
+            raise database_error
     else:
         print("⚠️ Processing stopped: No clean data available to export.")
