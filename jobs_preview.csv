@@ -1,0 +1,4 @@
+job_id,title,company,location,salary_min,salary_max,created_at,skills_demanded,extracted_date
+mock_1_141320,Junior Data Analyst,TCS,Bengaluru,400000,600000,2026-10-16,"Python, Sql, Excel",2026-10-16
+mock_2_141320,Data Analyst,Infosys,Pune,500000,750000,2026-10-16,"Sql, Power Bi, Tableau",2026-10-16
+mock_3_141320,Business Data Analyst,Wipro,Mumbai,450000,650000,2026-10-16,"Python, Excel",2026-10-16

@@ -1,0 +1,28 @@
+name: Daily Job Market ETL Pipeline
+
+on:
+  schedule:
+    # This schedules the pipeline to run automatically every day at 12:00 AM UTC (5:30 AM IST)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # This allows you to trigger it manually from GitHub anytime
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+
+    - name: Set up Python environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run ETL Script
+      run: python elt_pipeline.py
