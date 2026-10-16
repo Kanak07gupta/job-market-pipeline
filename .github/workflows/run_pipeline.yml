@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-etl:
-    runs-on: ubuntu-24.04  # Explicitly pins a stable image environment
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Check out repository code
@@ -17,7 +17,12 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-        cache: 'pip'  # Speeds up future workflow builds
+
+    # यह स्टेप क्लाउड मशीन में डेटाबेस ड्राइवर्स को कंपाइल करने की सुविधा देगा
+    - name: Install PostgreSQL System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpq-dev gcc python3-dev
 
     - name: Install dependencies
       run: |
