@@ -13,13 +13,15 @@ KEYWORD = "Data Analyst"
 def fetch_job_data():
     print("🚀 Fetching live data from Adzuna API...")
     # Explicit base endpoint structure with proper directory paths
-    url = f"https://adzuna.com{COUNTRY}/search/1"
+    # Corrected root API endpoint for Adzuna's job search database
+    url = f"https://api.adzuna.com/v1/api/jobs/{COUNTRY}/search/1"
 
     params = {
         'app_id': APP_ID,
         'app_key': APP_KEY,
         'what': KEYWORD,
-        'results_per_page': 50
+        'results_per_page': 50,
+        'content-type': 'application/json'  # Forces clean structured response formatting
     }
 
     try:
