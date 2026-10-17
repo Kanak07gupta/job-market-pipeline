@@ -12,7 +12,7 @@ KEYWORD = "Data Analyst"
 
 def fetch_job_data():
     print("🚀 Fetching live data from Adzuna API...")
-    url = f"https://api.adzuna.com/v1/api/jobs/{COUNTRY}/search/1"
+    url = f"https://adzuna.com{COUNTRY}/search/1"
 
     params = {
         'app_id': APP_ID,
@@ -51,13 +51,19 @@ def clean_and_transform(raw_jobs):
             if skill in description:
                 skills.append(skill.title())
 
-        # CRITICAL FIX: Keeping job_id as a pure integer value to match database requirements
         try:
             raw_id = job.get('id')
             job_id = int(float(raw_id)) if raw_id else 0
         except (ValueError, TypeError):
             import time
             job_id = int(time.time())
+
+        # FIX: API से आने वाले टाइमस्टैम्प को साफ अक्षरों में YYYY-MM-DD फॉर्मेट में बदलना
+        raw_date = job.get('created', '')
+        if raw_date and len(raw_date) >= 10:
+            clean_created_at = raw_date[:10]
+        else:
+            clean_created_at = datetime.today().strftime('%Y-%m-%d')
 
         cleaned_job = {
             'job_id': job_id,
@@ -66,7 +72,7 @@ def clean_and_transform(raw_jobs):
             'location': job.get('location', {}).get('display_name', 'India'),
             'salary_min': job.get('salary_min'),
             'salary_max': job.get('salary_max'),
-            'created_at': job.get('created', datetime.today().strftime('%Y-%m-%d')),
+            'created_at': clean_created_at,
             'skills_demanded': ", ".join(skills) if skills else "Not Specified",
             'extracted_date': datetime.today().strftime('%Y-%m-%d')
         }
@@ -83,13 +89,15 @@ def get_mock_data():
     return [
         {"id": unique_suffix + 1, "title": "Junior Data Analyst", "company": {"display_name": "TCS"},
          "location": {"display_name": "Bengaluru"}, "salary_min": 400000, "salary_max": 600000,
-         "description": "Looking for skills in Python, SQL, and Excel."},
+         "description": "Looking for skills in Python, SQL, and Excel.",
+         "created": datetime.today().strftime('%Y-%m-%d')},
         {"id": unique_suffix + 2, "title": "Data Analyst", "company": {"display_name": "Infosys"},
          "location": {"display_name": "Pune"}, "salary_min": 500000, "salary_max": 750000,
-         "description": "Must know SQL, Power BI, and Tableau."},
+         "description": "Must know SQL, Power BI, and Tableau.", "created": datetime.today().strftime('%Y-%m-%d')},
         {"id": unique_suffix + 3, "title": "Business Data Analyst", "company": {"display_name": "Wipro"},
          "location": {"display_name": "Mumbai"}, "salary_min": 450000, "salary_max": 650000,
-         "description": "Requires advanced Excel and Python data analysis tools."}
+         "description": "Requires advanced Excel and Python data analysis tools.",
+         "created": datetime.today().strftime('%Y-%m-%d')}
     ]
 
 
@@ -110,11 +118,11 @@ if __name__ == "__main__":
             query={"sslmode": "require"}
         )
 
+        engine = None
         try:
             print("🔗 Connecting to Supabase Cloud Database...")
             engine = create_engine(connection_url, connect_args={"connect_timeout": 15})
 
-            # सुरक्षित ट्रांजेक्शन ब्लॉक ताकि SQL टेबल तुरंत डेटाबेस में बन सके
             with engine.connect() as conn:
                 with conn.begin():
                     conn.execute(text("""
@@ -131,14 +139,12 @@ if __name__ == "__main__":
                         );
                     """))
 
-                # अब बिना किसी एरर के पुराने जॉब आईडी फ़ेच करें
                 existing_ids = pd.read_sql(text("SELECT job_id FROM data_analyst_jobs"), con=conn)
 
             if not existing_ids.empty:
                 df_cleaned = df_cleaned[~df_cleaned['job_id'].astype(int).isin(existing_ids['job_id'].astype(int))]
 
             if not df_cleaned.empty:
-                # 'append' मोड का इस्तेमाल करके नया डेटा डालें
                 df_cleaned.to_sql('data_analyst_jobs', con=engine, if_exists='append', index=False)
                 print(f"🎉 Success! {len(df_cleaned)} new records have been appended to your cloud warehouse.")
             else:
@@ -147,5 +153,8 @@ if __name__ == "__main__":
         except Exception as database_error:
             print(f"❌ Database upload failed: {database_error}")
             raise database_error
+        finally:
+            if engine:
+                engine.dispose()  # FIX: कनेक्शन पूल को बंद करना ताकि पूल मैनेजर एरर न दे
     else:
         print("⚠️ Processing stopped: No clean data available to export.")
