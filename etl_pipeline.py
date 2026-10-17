@@ -101,15 +101,17 @@ if __name__ == "__main__":
         df_cleaned.to_csv("jobs_preview.csv", index=False)
 
         # कनेक्शन स्ट्रिंग में sslmode को साफ़ तौर पर पास करना
+        # कनेक्शन स्ट्रिंग में सही होस्ट और sslmode को साफ़ तौर पर पास करना
         connection_url = URL.create(
             drivername="postgresql+psycopg2",
             username="postgres.esiglramkipcofhgyczz",
             password="Iamagirl@kanak07",
-            host="://supabase.com",
+            host="aws-0-ap-south-1.pooler.supabase.com",  # ✅ बिल्कुल सही होस्ट नेम
             port=5432,
             database="postgres",
             query={"sslmode": "require"}
         )
+
 
         try:
             print("🔗 Connecting to Supabase Cloud Database...")
