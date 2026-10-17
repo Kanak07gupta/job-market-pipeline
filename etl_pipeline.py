@@ -112,12 +112,28 @@ if __name__ == "__main__":
             query={"sslmode": "require"}
         )
 
-
         try:
             print("🔗 Connecting to Supabase Cloud Database...")
             engine = create_engine(connection_url, connect_args={"connect_timeout": 15})
 
+            # यह कोड चेक करेगा कि टेबल मौजूद है या नहीं, अगर नहीं है तो अपने आप बना देगा
             with engine.connect() as conn:
+                conn.execute(text("""
+                    CREATE TABLE IF NOT EXISTS data_analyst_jobs (
+                        job_id BIGINT PRIMARY KEY,
+                        title TEXT,
+                        company TEXT,
+                        location TEXT,
+                        salary_min NUMERIC,
+                        salary_max NUMERIC,
+                        created_at TEXT,
+                        skills_demanded TEXT,
+                        extracted_date TEXT
+                    );
+                """))
+                conn.commit()
+
+                # अब पुराने जॉब आईडी फ़ेच करें
                 existing_ids = pd.read_sql(text("SELECT job_id FROM data_analyst_jobs"), con=conn)
 
             if not existing_ids.empty:
@@ -132,5 +148,3 @@ if __name__ == "__main__":
         except Exception as database_error:
             print(f"❌ Database upload failed: {database_error}")
             raise database_error
-    else:
-        print("⚠️ Processing stopped: No clean data available to export.")
