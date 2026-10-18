@@ -7,6 +7,7 @@ from sqlalchemy import create_engine, URL, text
 st.set_page_config(page_title="Data Professional Job Market Insights", layout="wide", page_icon="📈")
 
 
+
 # 2. Reusable Database Connection Pool with SSL Mode Forced
 @st.cache_resource
 def get_db_engine():
@@ -14,12 +15,13 @@ def get_db_engine():
         drivername="postgresql+psycopg2",
         username="postgres.esiglramkipcofhgyczz",
         password="Iamagirl@kanak07",
-        host="://supabase.com",
+        host="aws-0-ap-south-1.pooler.supabase.com",  # Correct host mapping format
         port=5432,
         database="postgres",
         query={"sslmode": "require"}
     )
     return create_engine(connection_url, connect_args={"connect_timeout": 15})
+
 
 
 # 3. Optimized Data Fetching
