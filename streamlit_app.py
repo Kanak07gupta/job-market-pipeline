@@ -25,7 +25,7 @@ def get_db_engine():
 
 
 # 3. Optimized Data Fetching
-@st.cache_data(ttl=300)  # 5 मिनट का कैश टाइमर ताकि तुरंत डेटा दिखे
+@st.cache_data(ttl=0)  # 5 मिनट का कैश टाइमर ताकि तुरंत डेटा दिखे
 def load_job_data():
     engine = get_db_engine()
     query = "SELECT * FROM data_analyst_jobs;"

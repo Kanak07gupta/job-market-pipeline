@@ -137,8 +137,10 @@ if __name__ == "__main__":
 
             with engine.connect() as conn:
                 with conn.begin():
+                    # पुरानी अटकी हुई टेबल को हटाकर पूरी तरह से क्लीन शुरुआत करना
+                    conn.execute(text("DROP TABLE IF EXISTS data_analyst_jobs;"))
                     conn.execute(text("""
-                        CREATE TABLE IF NOT EXISTS data_analyst_jobs (
+                        CREATE TABLE data_analyst_jobs (
                             job_id BIGINT PRIMARY KEY,
                             title TEXT,
                             company TEXT,
